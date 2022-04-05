@@ -4,7 +4,14 @@ import Likes from "./Likes";
 import * as React from "react";
 import { useState } from "react";
 import { View, Text, TouchableWithoutFeedback } from "react-native";
-export default function CustomVideo({ item, navigation, userVideo }) {
+import CustomButton from "./CustomButton";
+import { deleteVideo } from "../utils/api";
+export default function CustomUserVideo({
+  item,
+  navigation,
+  userVideo,
+  setVideos,
+}) {
   const videoref = React.useRef(null);
   const [playing, setPlaying] = useState(true);
 
@@ -37,19 +44,31 @@ export default function CustomVideo({ item, navigation, userVideo }) {
           ref={videoref}
         />
         <View style={styles.videoInfo}>
-          <Text style={styles.videoInfoTextUsername}>{item.username}</Text>
           <Text style={styles.videoTitle}>{item.title}</Text>
 
-          <Text style={styles.videoInfoTextDescription}>
-            {item.description}
-          </Text>
-
-          <Text style={styles.videoInfoTextTags}>
-            {item.tags.map((tag) => tag + "  ")}
-          </Text>
-          <Text style={styles.videoInfoTextDate}>
+          <Text style={styles.videoInfoText}>{item.description}</Text>
+          <Text style={styles.videoInfoText}>
             {new Date(item.created_at).toLocaleDateString()}
           </Text>
+          <Text style={styles.videoInfoText}>
+            {item.tags.map((tag) => tag + "  ")}
+          </Text>
+          {userVideo ? (
+            <CustomButton
+              title="Delete"
+              onPress={() => {
+                deleteVideo(item.id).then(() => {
+                  setVideos((currentVideos) => {
+                    return currentVideos.filter((video) => {
+                      return video.cloudinary_id !== item.id;
+                    });
+                  });
+                });
+              }}
+            />
+          ) : (
+            <></>
+          )}
 
           <Likes item={item} navigation={navigation} />
         </View>
